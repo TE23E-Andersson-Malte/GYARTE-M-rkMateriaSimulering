@@ -3,20 +3,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.style.use('seaborn-poster')
+#plt.style.use('seaborn-poster')
 
-#Initiera antal partiklar, massor, positioner och hastigheter
-#Sätt gravitationskonstanten G och tidssteget h
-#För varje tidssteg tills simuleringstiden är slut:
-    #För varje partikel:
-        #Beräkna den totala gravitationskraften från alla andra partiklar
-        #Beräkna acceleration = kraft / massa
-        #Uppdatera hastighet med Eulers metod
-        #Uppdatera position med Eulers metod
-    #Spara positioner och energivärden för analys
-#Rita partiklarna och deras banor
-#Analysera hur resultatet påverkas av antal partiklar, massa och hastighet
-#Avsluta programmet
+#Sätt gravitationskonstanten G och tidssteget h samt andra konstanter som behövs för Eulers stegmetod
+# Define parameters (importerade med Eulers stegmetod)
+f = lambda t, s: np.exp(-t) # ODE
+h = 0.1 # Step size
+t = np.arange(0, 1 + h, h) # Numerical grid
+s0 = -1 # Initial Condition
+
+G = 1 #6.674e-11 
+t_max = 1  # total simuleringstid
+steg = int(t_max / h)
+
 
 #_______________________
 #________METODER________
@@ -24,26 +23,67 @@ plt.style.use('seaborn-poster')
 
 #Importerad metod för Eulers stegmetod 
 
-# Define parameters
-f = lambda t, s: np.exp(-t) # ODE
-h = 0.1 # Step size
-t = np.arange(0, 1 + h, h) # Numerical grid
-s0 = -1 # Initial Condition
-
 # Explicit Euler Method
-s = np.zeros(len(t))
-s[0] = s0
+def euler(s0, f, h):
+    t = np.arange(0, t_max + h, h)  # tidsgrid
+    s = np.zeros(len(t))
+    s[0] = s0
 
-for i in range(0, len(t) - 1):
-    s[i + 1] = s[i] + h*f(t[i], s[i])
+    for i in range(0, len(t) - 1):
+        s[i + 1] = s[i] + h*f(t[i], s[i])
 
-plt.figure(figsize = (12, 8))
-plt.plot(t, s, 'bo--', label='Approximate')
-plt.plot(t, -np.exp(-t), 'g', label='Exact')
-plt.title('Approximate and Exact Solution \
-for Simple ODE')
-plt.xlabel('t')
-plt.ylabel('f(t)')
-plt.grid()
-plt.legend(loc='lower right')
+    return t,s
+
+def total_gravitationskraft(i, Positioner, Massor):
+    kraft = np.zeros(2)
+    for j in range(len(Massor)):
+        if i != j:
+            diff = Positioner[j] - Positioner[i]
+            dist = np.linalg.norm(diff)
+            if dist > 1e-5:  # undvik division med 0
+                kraft += G * Massor[i] * Massor[j] * diff / dist**3
+    return kraft
+
+#_______________________
+#______Programmet_______
+#_______________________
+
+#Initiera antal partiklar, massor, positioner och hastigheter
+N = 10 #Antal partiklar
+Massor = np.random.uniform(1, 10, size=N) #Skapar array med partiklarnas massor (slumpad mellan 1 och 10)
+Positioner = np.random.uniform(-1, 1, size=(N,2)) #Skapar array med partiklarnas slumpade positioner (x, y) för N partiklar
+Hastigheter = np.zeros((N, 2)) #Skapar array med partiklarnas hastigheter (alla är 0)
+
+#Spara positioner för analys
+Positions_historik = np.zeros((steg+1, N, 2))
+Positions_historik[0] = Positioner
+
+#För varje tidssteg tills simuleringstiden är slut:
+    #För varje partikel:
+for steg in range(steg):
+    for i in range(N):
+        #Beräkna den totala gravitationskraften från alla andra partiklar
+        a = total_gravitationskraft(i, Positioner, Massor) / Massor[i]
+
+        # Uppdatera hastighet med Eulers metod
+        Hastigheter[i] = Hastigheter[i] + a * h
+
+        # Uppdatera position med Eulers metod
+        Positioner[i] = Positioner[i] + Hastigheter[i] * h
+
+    # Spara positioner
+    Positions_historik[steg + 1] = Positioner
+    
+
+#Rita partiklarna och deras banor
+plt.figure(figsize=(12, 8))
+for i in range(N):
+    plt.plot(Positions_historik[:, i, 0]*1e5, Positions_historik[:, i, 1]*1e5, label=f'Partikel {i+1}')
+plt.title('Partiklarnas banor i 2D')
+plt.xlabel('x-position')
+plt.ylabel('y-position')
+plt.grid(True)
+plt.legend()
 plt.show()
+#Avsluta programmet
+
