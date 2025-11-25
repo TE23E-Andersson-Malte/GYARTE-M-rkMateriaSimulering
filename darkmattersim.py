@@ -12,8 +12,8 @@ h = 0.1 # Step size
 t = np.arange(0, 1 + h, h) # Numerical grid
 s0 = -1 # Initial Condition
 
-G = 1 #6.674e-11 
-t_max = 1  # total simuleringstid
+G = 1e-3 #6.674e-11 
+t_max = 5  # total simuleringstid
 steg = int(t_max / h)
 
 
@@ -60,7 +60,7 @@ Positions_historik[0] = Positioner
 
 #För varje tidssteg tills simuleringstiden är slut:
     #För varje partikel:
-for steg in range(steg):
+for tid in range(steg):
     for i in range(N):
         #Beräkna den totala gravitationskraften från alla andra partiklar
         a = total_gravitationskraft(i, Positioner, Massor) / Massor[i]
@@ -72,13 +72,19 @@ for steg in range(steg):
         Positioner[i] = Positioner[i] + Hastigheter[i] * h
 
     # Spara positioner
-    Positions_historik[steg + 1] = Positioner
+    Positions_historik[tid + 1] = Positioner
     
-
 #Rita partiklarna och deras banor
 plt.figure(figsize=(12, 8))
 for i in range(N):
-    plt.plot(Positions_historik[:, i, 0]*1e5, Positions_historik[:, i, 1]*1e5, label=f'Partikel {i+1}')
+    start_x = f"{Positions_historik[0, i, 0]:.2f}"
+    start_y = f"{Positions_historik[0, i, 1]:.2f}"
+    
+    plt.plot(
+        Positions_historik[:, i, 0],
+        Positions_historik[:, i, 1],
+        label=f'Partikel {i+1}: Massa = {Massor[i]:.2f}, Start = ({start_x}, {start_y})'
+    )
 plt.title('Partiklarnas banor i 2D')
 plt.xlabel('x-position')
 plt.ylabel('y-position')
