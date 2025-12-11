@@ -34,13 +34,14 @@ def euler(s0, f, h):
 
     return t,s
 
+#Beräkna gravitationskraft på partikel i
 def total_gravitationskraft(i, Positioner, Massor):
     kraft = np.zeros(2)
     for j in range(len(Massor)):
         if i != j:
             diff = Positioner[j] - Positioner[i]
             dist = np.linalg.norm(diff)
-            if dist > 1e-5:  # undvik division med 0
+            if dist > 1e-10:  # undvik division med 0
                 kraft += G * Massor[i] * Massor[j] * diff / dist**3
     return kraft
 
