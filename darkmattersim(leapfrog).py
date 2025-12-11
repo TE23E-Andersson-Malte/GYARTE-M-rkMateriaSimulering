@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 G = 6.67e-11              # Gravitationskonstant
 h = 0.01               # Tidssteg
-t_max = 5             # Total simuleringstid
+t_max = 1             # Total simuleringstid
 steg = int(t_max / h) # Antal steg
 
 #------------------------------
@@ -31,7 +31,7 @@ def total_gravitationskraft(i, Positioner, Massor):
 #------------------------------
 
 N = 10
-Massor = np.random.uniform(1, 10, size=N) * 1e7            # Massor
+Massor = np.random.uniform(1, 10, size=N)  * 10e7     # Massor
 Positioner = np.random.uniform(-1, 1, size=(N, 2))    # Startpositioner
 Hastigheter = np.zeros((N, 2))                        # Börjar stillastående
 
